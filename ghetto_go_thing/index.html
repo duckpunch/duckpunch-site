@@ -1,0 +1,89 @@
+<!doctype html>
+<html>
+<head>
+<style>
+.row, #add-row, .row-controls {
+    clear: both;
+}
+.diagram, .controls {
+    float: left;
+    margin-right: 50px;
+}
+.clicky {
+    cursor: pointer;
+    border: 1px #ccc dotted;
+}
+</style>
+<style media="print">
+.clicky, .row-controls {
+    display: none;
+}
+</style>
+<script src="d3.v3.min.js"></script>
+</head>
+<body>
+<div id="container"></div>
+<div id="add-row" class="clicky">add row</div>
+<script>
+d3.select("#add-row").on("click", function() {
+    var row_controls = d3.select("#container").append("div")
+            .attr("class", "row-controls"),
+        added_row = d3.select("#container").append("div")
+            .attr("class", "row"),
+        w_select, h_select;
+    row_controls.append("div").attr("class", "clicky controls").html("add diagram").on("click", function() {
+        var w = w_select.node().value,
+            diagram_box = added_row.append("div").attr("class", "diagram"),
+            close_diagram = diagram_box.append("div").attr("class", "clicky").html("[x]").on("click", function() {
+                diagram_box.remove();
+            }),
+            grid = diagram_box.append("svg:svg")
+                .attr("width", 25 * (w - 1) + 10)
+                .attr("height", 25 * (w - 1) + 10);
+            pattern = grid.append("svg:defs").append("pattern")
+                .attr("width", 25)
+                .attr("height", 25)
+                .attr("patternUnits", "userSpaceOnUse")
+                .attr("id", "yeybox");
+
+        pattern.append("svg:rect")
+            .attr("width", 25)
+            .attr("height", 25)
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("stroke", "black")
+            .attr("fill", "white");
+        grid.append("svg:rect")
+            .attr("x", 1)
+            .attr("y", 1)
+            .attr("height", 25 * (w - 1))
+            .attr("width", 25 * (w - 1))
+            .attr("fill", "url(#yeybox)")
+            .on("click", function () {
+                var coords = d3.mouse(this);
+                var cx = Math.floor(coords[0] / 25 + 0.5);
+                var cy = Math.floor(coords[1] / 25 + 0.5);
+                var stone = grid.append("svg:circle")
+                    .attr("class", "stone")
+                    .attr("cx", 25 * cx)
+                    .attr("cy", 25 * cy)
+                    .attr("r", 10)
+                    .attr("stroke", "black")
+                    .attr("fill", "black")
+                    .on("click", function() {
+                        if (stone.attr("fill") === "black") {
+                            stone.attr("fill", "white");
+                        } else {
+                            stone.remove();
+                        }
+                    });
+            })
+    });
+    w_select = row_controls.append("select").attr("class", "controls");
+    for (var i = 2; i <= 19; i++) {
+        w_select.append("option").attr("value", i).html(i);
+    }
+});
+</script>
+</body>
+</html>
